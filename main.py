@@ -56,13 +56,15 @@ def collectParameters():
         
     def collectEntry(req):
         p_frame = Toplevel(root)
+        p_frame.resizable(False, False)
+
 
         p_label = Label(p_frame, text=req[0] + " = ")
         p_label.grid(row=0, column=0)
 
         p_entry = Entry(p_frame, text="")
         p_entry.grid(row=0, column=1)
-
+        p_entry.bind("<Return>", lambda event: submit(p_entry.get(), params, req, p_frame))
         p_submit = Button(p_frame, text="Submit", command=lambda: submit(p_entry.get(), params, req, p_frame))
         p_submit.grid(row=0, column=2)
 
