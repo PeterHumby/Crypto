@@ -15,10 +15,10 @@ def mod_expon(a, m, n): # Calculate a^m (mod n) using repeated squaring.
     bits = list(bin(m)[2:][::-1])
     tot = 1
     for i in range(len(bits)):
+        sub = a
+        for j in range(i):
+            sub = (sub ** 2) % n
         if bits[i] == '1':
-            sub = a
-            for j in range(i):
-                sub = (sub ** 2) % n
             tot = (tot * sub) % n
     return tot
 
@@ -41,7 +41,7 @@ def tuple_quick_sort(l, i=0): # Quick sort by the i-th element of each tuple, de
     return tuple_quick_sort(lower) + middle + tuple_quick_sort(higher)
 
 
-''' Potentially convert to explicitly use row operations so this can be used to produce inverses of square matrices'''
+''' Potentially convert to explicitly use row operations so this can be used to produce inverses of square matrices
 def rref(M): # Apply Gaussian elimination to convert a matrix M to reduced row echelon form (RREF).
     m = len(M)
     n = len(M[0])
@@ -62,8 +62,9 @@ def rref(M): # Apply Gaussian elimination to convert a matrix M to reduced row e
                 M[j][k] -= mult * M[i][k]        
         
     return M
+'''
+
 
 def rand_mat(m, n):
     return [[random.randint(-5, 5) for x in range(n)] for y in range(m)]
-
 

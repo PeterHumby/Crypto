@@ -4,7 +4,7 @@ import tkinter.filedialog as filedialog
 from tkinter.simpledialog import askinteger
 from tkinter.ttk import Combobox
 from Ciphers import *
-from utilities import *
+from Utilities import *
 import logging, os
 
 params = []
@@ -16,6 +16,7 @@ h = 25
 root.geometry("{0}x{1}".format(x, y))
 root.title("Crypto")
 root.resizable(False, False)
+
 
 ciphers = [file[:-3] for file in os.listdir('Ciphers') if file[0] != '_']
 drop = Combobox(root, values=ciphers)
@@ -58,42 +59,60 @@ def collectParameters():
         p_frame = Toplevel(root)
         p_frame.resizable(False, False)
 
+        p_description = Label(p_frame, text = req[-1])
+        p_description.grid(row=0, columnspan=3)
 
         p_label = Label(p_frame, text=req[0] + " = ")
-        p_label.grid(row=0, column=0)
+        p_label.grid(row=1, column=0)
+
 
         p_entry = Entry(p_frame, text="")
-        p_entry.grid(row=0, column=1)
+        p_entry.grid(row=1, column=1)
         p_entry.bind("<Return>", lambda event: submit(p_entry.get(), params, req, p_frame))
         p_submit = Button(p_frame, text="Submit", command=lambda: submit(p_entry.get(), params, req, p_frame))
-        p_submit.grid(row=0, column=2)
+        p_submit.grid(row=1, column=2)
+
+        
 
         for i in range(len(req[2])):
             p_conditionLabel = Label(p_frame, text=req[2][i][1])
-            p_conditionLabel.grid(row=(i+1), columnspan=3)
+            p_conditionLabel.grid(row=(i+2), columnspan=3)
 
         root.wait_window(p_frame)
+    
+    def collectVector(req):
+        pass
 
     for req in reqs:
-        if req[1] == int:
+        if req[1] in [int, str]:
             collectEntry(req)
-    return params
+    return dict(zip([r[0] for r in reqs], params))
 
 def process():
     assert entry.get()[-4:] == ".txt", "Invalid Path"
 
-    file = open(entry.get(), "r", encoding='utf-8')
-    text = file.read()
-    file.close()
-    
+    in_file = open(entry.get(), "r", encoding='utf-8', newline='')
+    text = in_file.read()
+    in_file.close()
     func = getattr(globals()[drop.get()], mode.get().lower())
-    
-    ciphertext = func(text, collectParameters())
+    params = collectParameters()
+    out = func(text, list(params.values()))
 
-    file = filedialog.asksaveasfile(initialfile="Output.txt", defaultextension=".txt", filetypes=[("Text Documents", ".txt")])
-    file.write(ciphertext)
-    os.startfile(file.name)
-    file.close()
+    ciphertext = out[0]
+    key = out[1]
+
+    out_file_path = filedialog.asksaveasfilename(initialfile="Output.txt", defaultextension=".txt", filetypes=[("Text Documents", ".txt")])
+    out_file = open(out_file_path, "w", encoding='utf-8')
+    param_file = open(out_file.name[:-4] + "_params" + ".txt", "w", encoding='utf-8')
+
+    out_file.write(str(ciphertext))
+    param_file.write(str(key))
+    
+    os.startfile(param_file.name)
+    os.startfile(out_file.name)
+    
+    out_file.close()
+    param_file.close()
 
 process = Button(root, text="Process", command=process)
 

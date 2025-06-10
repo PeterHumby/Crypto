@@ -1,22 +1,19 @@
 
 '''
-Asymmetric cipher with integer key n performing a ASCII shift
-
-Decode with key -n.
-
+Textbook RSA encryption - asymmetric with public key (n, e).
 '''
 
-from utilities import mod_expon
+from Utilities import mod_expon
 
 def get_parameters():
-    return {"encrypt": [("Block Size", int, []),
-                        ("p", int, [("params[1] > 100**params[0]", "p must be greater than 100^Block Size")]), 
-                        ("q", int, [("params[2] > 100**params[0]", "q must be greater than 100^Block Size")]), 
-                        ("e", int, [("gcd( (params[1] - 1) * (params[2] - 1), params[2]) == 1", "e must be coprime to (p - 1)(q - 1)")])
+    return {"encrypt": [("Block Size", int, [], "Block Size"),
+                        ("p", int, [("params[1] > 100**params[0]", "p must be greater than 100^Block Size")], "1st Prime"), 
+                        ("q", int, [("params[2] > 100**params[0]", "q must be greater than 100^Block Size")], "2nd Prime"), 
+                        ("e", int, [("gcd( (params[1] - 1) * (params[2] - 1), params[2]) == 1", "e must be coprime to (p - 1)(q - 1)")], "Public Exponent")
                         ], 
-            "decrypt": [("Block Size", int, []),
-                        ("n", int, []), 
-                        ("d", int, [])
+            "decrypt": [("Block Size", int, [], "Block Size"),
+                        ("n", int, [], "Public Modulus"), 
+                        ("d", int, [], "Private Exponent")
                         ]}
 
 
@@ -44,7 +41,10 @@ def encrypt(text, params):
 
     e_blocks = list(map(lambda x: str(mod_expon(x, e, n)), blocks))
     e_blocks = list(map(lambda x: "0" * (b*3 - len(x)) + x, e_blocks))
-    return ' '.join(e_blocks)
+
+    key = {"Block Size": b, "p": p, "q": q, "n": p*q, "e": e, "d": 0} # d TEMP PLACEHOLDER
+
+    return [' '.join(e_blocks), key]
 
 
 
@@ -58,4 +58,6 @@ def decrypt(text, params):
 
     chars = [chr(int(decrypted[3*i:3*(i+1)])) for i in range(len(decrypted) // 3)]
 
-    return ''.join(chars)
+    key = {"Block Size": b, "n": n, "d": d}
+
+    return [''.join(chars), key]
